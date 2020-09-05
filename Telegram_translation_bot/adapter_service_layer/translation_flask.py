@@ -12,7 +12,7 @@ def translate():
 	text = request.form['text']
 	dest_lang = request.form['dest_lang']
 	src_lang = request.form['src_lang']
-	output = translator.translate(text, src=src_lang, dest=dest_lang)
+	output = translator.translate(text, dest=dest_lang)
 	return Response('{"response":"' + output.text + '"}', status=200, mimetype='application/json')
 
 

@@ -15,15 +15,6 @@ def translate(update, context):
     text = ' '.join(context.args)  # ['hello', 'world'] -> 'hello world'
     context.bot.send_message(chat_id=update.message.from_user.id, text="Translating '" + text + "'")
     
-    #route to source_langauge service
-    url = 'http://127.0.0.1:5004/language'
-    myobj = {
-         'user_id': update.message.from_user.id
-    }
-
-    res = requests.get(url, params=myobj)    
-    src_lang = res.json()['retreived']
-    
     #route to destination_langauge service
     url = 'http://127.0.0.1:5003/language'
     myobj = {
@@ -37,8 +28,7 @@ def translate(update, context):
     url = 'http://127.0.0.1:5002/translate'
     myobj = {
          'text': text,
-         'dest_lang': dest_lang,
-         'src_lang' : src_lang
+         'dest_lang': dest_lang
     }
 
     res = requests.post(url, data=myobj)
@@ -60,20 +50,6 @@ def dest_language(update, context):
     res = requests.post(url, data=myobj)
     context.bot.send_message(chat_id=update.message.from_user.id, text='Selected langauge: ' + lang)
     
-def src_language(update, context):
-	# getting user prefered destination language
-    lang = context.args[0]  # ['it'] -> 'it'
-    
-    # route to the language service
-    url = 'http://127.0.0.1:5004/language'
-    myobj = {
-         'user_id': update.message.from_user.id,
-         'src_lang': lang
-    }
-
-    res = requests.post(url, data=myobj)
-    context.bot.send_message(chat_id=update.message.from_user.id, text='Selected langauge: ' + lang)
-    
 def list_languages(update, context):
 	# getting user prefered destination language
     languages = ' '.join(context.args)  # ['it'] -> 'it'
@@ -81,11 +57,11 @@ def list_languages(update, context):
     # route to the language service
     url = 'http://127.0.0.1:5005/list'
     myobj = {
-         'user_id': update.message.from_user.id,
          'list_lang': languages
     }
 
-    res = requests.post(url, data=myobj)
+    res = requests.get(url)
+    languages = res.text()
     context.bot.send_message(chat_id=update.message.from_user.id, text='Supported langauges: ' + languages)    
     
 
@@ -105,12 +81,8 @@ def init_bot():
     # let accept "/dest_language ..." from the bot
     dest_lang_handler = CommandHandler('dest_language', dest_language)
     dispatcher.add_handler( dest_lang_handler)
-    
-    # let accept "/src_language ..." from the bot
-    src_lang_handler = CommandHandler('src_language', src_language)
-    dispatcher.add_handler( src_lang_handler)
-    
-     # let accept "/list_languages ..." from the bot
+      
+    # let accept "/list_languages ..." from the bot
     list_handler = CommandHandler('list_languages', list_languages)
     dispatcher.add_handler(list_handler)
 
