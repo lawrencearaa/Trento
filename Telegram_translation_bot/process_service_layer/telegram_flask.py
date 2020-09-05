@@ -107,7 +107,7 @@ def init_bot():
     dispatcher.add_handler( dest_lang_handler)
     
     # let accept "/src_language ..." from the bot
-    src_lang_handler = CommandHandler('src_language', scr_language)
+    src_lang_handler = CommandHandler('src_language', src_language)
     dispatcher.add_handler( src_lang_handler)
     
      # let accept "/list_languages ..." from the bot
