@@ -61,7 +61,7 @@ def list_languages(update, context):
     }
 
     res = requests.get(url)
-    languages = res.text()
+    languages = res.text
     context.bot.send_message(chat_id=update.message.from_user.id, text='Supported langauges: ' + languages)    
     
 
