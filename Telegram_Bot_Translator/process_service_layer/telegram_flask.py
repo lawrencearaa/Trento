@@ -1,6 +1,8 @@
 from flask import Flask, Response
 from telegram.ext import CommandHandler, Updater, MessageHandler, Filters
 import requests
+import json
+import ast 
 
 bot_token = '1231315957:AAG_sYHCOWxGPKpHxKtmr1iowV8zy2j8Lhs'
 
@@ -8,7 +10,7 @@ app = Flask(__name__)
 
 
 def start(update, context):
-    context.bot.send_message(chat_id=update.message.from_user.id, text="Hi! Welcome...")
+    context.bot.send_message(chat_id=update.message.from_user.id, text="Hi! Welcome, lets translate some text")
     
 def translate(update, context):
 	# merging all the words passed from the user
@@ -51,6 +53,7 @@ def dest_language(update, context):
     context.bot.send_message(chat_id=update.message.from_user.id, text='Selected langauge: ' + lang)
     
 def list_languages(update, context):
+   
 	# getting user prefered destination language
     languages = ' '.join(context.args)  # ['it'] -> 'it'
     
@@ -61,8 +64,35 @@ def list_languages(update, context):
     }
 
     res = requests.get(url)
-    languages = res.text
-    context.bot.send_message(chat_id=update.message.from_user.id, text='Supported langauges: ' + languages)    
+    languages = res.json()['retreived']
+    print(type(languages))
+
+    dict_lang = ""
+    for each in languages['langauges']:
+       a = each['language']
+       b = each['code']
+       dict_lang += a+" : " +b +"\n"
+       print(a + ':' + b)
+    
+    context.bot.send_message(chat_id=update.message.from_user.id, text='Supported langauges with their langauge codes: ' +"\n"+ dict_lang)  
+    #context.bot.send_message(chat_id=update.message.from_user.id, text='Supported langauges: ' + languages)  
+    
+
+def detect(update, context):
+	# merging all the words passed from the user
+    text = ' '.join(context.args)  # ['hello', 'world'] -> 'hello world'
+    context.bot.send_message(chat_id=update.message.from_user.id, text="Detecting '" + text + "'")
+    
+    # route to the detect language service
+    url = 'http://127.0.0.1:5004/detect'
+    myobj = {
+         'text': text
+    }
+
+    res = requests.post(url, data=myobj)
+    # read the json response
+    detected_language = res.json()['response']
+    context.bot.send_message(chat_id=update.message.from_user.id, text=detected_language)
     
 
 def init_bot():
@@ -85,6 +115,10 @@ def init_bot():
     # let accept "/list_languages ..." from the bot
     list_handler = CommandHandler('list_languages', list_languages)
     dispatcher.add_handler(list_handler)
+    
+    # let accept "/detect..." from the bot
+    detect_handler = CommandHandler('detect', detect)
+    dispatcher.add_handler(detect_handler)
 
     return updater
     
