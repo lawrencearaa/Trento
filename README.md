@@ -1,2 +1,2 @@
-# Trento
+# Telegram Bot Translator
 School work
